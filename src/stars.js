@@ -11,8 +11,12 @@ addEventListener("keydown", (e) => {
     keys[e.key] = true;
 });
 
-function mapPerspectiveToScreen(point3D) { 
-    return { x: (point3D.x * (1000 / point3D.z)) + windowWidth / 2, y: (point3D.y * (1000 / point3D.z)) + windowHeight / 2 };
+function calculateFocalLengthFromFov(fov) {
+    return (windowWidth / 2) * Math.tan((Math.PI / 180) * fov / 2) * 2;
+}
+
+function mapPerspectiveToScreen(point3D, focalLength) { 
+    return { x: (point3D.x * (focalLength / point3D.z)) + windowWidth / 2, y: (point3D.y * (focalLength / point3D.z)) + windowHeight / 2 };
 }
 
 console.log("fov: " + Math.atan((windowWidth / 2) / 1000) * 2 * (180 / Math.PI))
@@ -95,7 +99,7 @@ function startAnimation(canvas) {
                 star.coordinates.z -= 2;
             
             const transformedStarCoordinates = rotatePointRelativeToCamera(star.coordinates, pitchAngle, yawAngle, rollAngle);
-            const screenCoordinates = mapPerspectiveToScreen(transformedStarCoordinates); 
+            const screenCoordinates = mapPerspectiveToScreen(transformedStarCoordinates, calculateFocalLengthFromFov(document.getElementById("fovRange").value)); 
 
             if (star.coordinates.z <= -10000) {
                 star.coordinates.z = 10000;
