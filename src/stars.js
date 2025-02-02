@@ -21,31 +21,35 @@ function mapPerspectiveToScreen(point3D, focalLength) {
 
 console.log("fov: " + Math.atan((windowWidth / 2) / 1000) * 2 * (180 / Math.PI))
 
+const rotateYaw = (point3D, yawAngle) => ({
+    x: Math.cos(yawAngle) * point3D.x + Math.sin(yawAngle) * point3D.z,
+    y: point3D.y,
+    z: -Math.sin(yawAngle) * point3D.x + Math.cos(yawAngle) * point3D.z
+});
+
+const rotatePitch = (point3D, pitchAngle) => ({
+    x: point3D.x,
+    y: Math.cos(pitchAngle) * point3D.y - Math.sin(pitchAngle) * point3D.z,
+    z: Math.sin(pitchAngle) * point3D.y + Math.cos(pitchAngle) * point3D.z
+});
+
+const rotateRoll = (point3D, rollAngle) => ({
+    x: Math.cos(rollAngle) * point3D.x - Math.sin(rollAngle) * point3D.y,
+    y: Math.sin(rollAngle) * point3D.x + Math.cos(rollAngle) * point3D.y,
+    z: point3D.z,
+});
+
 function rotatePointRelativeToCamera(point3D, pitchAngle, yawAngle, rollAngle) {
     pitchAngle = (Math.PI / 180) * pitchAngle;
     yawAngle = (Math.PI / 180) * yawAngle;
     rollAngle = (Math.PI / 180) * rollAngle;
     
-    const pointWithYawTransformation = {
-        x: Math.cos(yawAngle) * point3D.x + Math.sin(yawAngle) * point3D.z,
-        y: point3D.y,
-        z: -Math.sin(yawAngle) * point3D.x + Math.cos(yawAngle) * point3D.z
-    };
-
-    const pointWithPitchTransformation = {
-        x: pointWithYawTransformation.x,
-        y: Math.cos(pitchAngle) * pointWithYawTransformation.y - Math.sin(pitchAngle) * pointWithYawTransformation.z,
-        z: Math.sin(pitchAngle) * pointWithYawTransformation.y + Math.cos(pitchAngle) * pointWithYawTransformation.z
-    };
-
-    const pointWithRollTransformation = {
-        x: Math.cos(rollAngle) * pointWithYawTransformation.x - Math.sin(rollAngle) * pointWithYawTransformation.y,
-        y: Math.sin(rollAngle) * pointWithYawTransformation.x + Math.cos(rollAngle) * pointWithYawTransformation.y,
-        z: pointWithYawTransformation.z,
-    };
+    const pointWithYawTransformation = rotateYaw(point3D, yawAngle);
+    const pointWithPitchTransformation = rotatePitch(pointWithYawTransformation, pitchAngle);
+    const pointWithRollTransformation = rotateRoll(pointWithPitchTransformation, rollAngle);
 
     return {
-        ...pointWithPitchTransformation
+        ...pointWithRollTransformation
     }
 }
 
